@@ -67,12 +67,20 @@ async fn run() {
 
     // https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html
 
-    teloxide::repl(bot, |message| async move {
-        message.answer_dice().send().await?;
-        //message.answer_str(info).await?;
-        ResponseResult::<()>::Ok(())
-    })
-    .await;
+    Dispatcher::new(bot)
+        .messages_handler(DialogueDispatcher::new(|cx| async move {
+            let DialogueWithCx {cx, dialogue} = cx;
+
+            let Wrapper(dialogue) = dialogue.unwrap();
+
+            dispatch!(
+                [cx, dialogue] -> 
+                [start, receive_full_name, receive_age, receive_favourite music]
+            )
+            .expect("Something wrong with the bot!")
+        }))
+        .dispatch()
+        .await;
 
     //teloxide::repl(bot, |message| async move {
         //let info = web;
