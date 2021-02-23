@@ -1,10 +1,11 @@
-extern crate timer;
-extern crate chrono;
+use timer;
+use chrono;
 
 use teloxide::prelude::*;
 use std::env;
 use tokio::time;
 use std::time::Duration;
+use sled::Db;
 
 async fn webrequest() -> Result<(), reqwest::Error> {
     let res = reqwest::get("https://www.rust-lang.org").await?;
@@ -18,6 +19,7 @@ async fn webrequest() -> Result<(), reqwest::Error> {
 
 async fn kittenloop(bot: teloxide::Bot) {
     let id = 249861073;
+    let kitty_db = Db::open("kitty_database").unwrap();
     bot.send_message(id, "Hello World").send().await.unwrap();
     let mut interval = time::interval(Duration::from_secs(10));
     /*loop {
