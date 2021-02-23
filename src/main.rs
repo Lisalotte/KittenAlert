@@ -4,10 +4,7 @@ extern crate chrono;
 use teloxide::prelude::*;
 use std::env;
 use tokio::time;
-use std::time::{Duration, Instant, SystemTime};
-
-use std::thread;
-use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 async fn webrequest() -> Result<(), reqwest::Error> {
     let res = reqwest::get("https://www.rust-lang.org").await?;
@@ -19,27 +16,28 @@ async fn webrequest() -> Result<(), reqwest::Error> {
     Ok(())
 }
 
+async fn kittenloop() {
+    let mut interval = time::interval(Duration::from_millis(2000));
+    loop {
+        interval.tick().await;
+        webrequest().await.unwrap();
+    }
+}
+
 #[tokio::main]
 async fn main() {
     env::set_var("TELOXIDE_TOKEN", "1671683413:AAEbPdktygghJI0HNE3aGy2FC67nmUoq75U");
 
     teloxide::enable_logging!();
-    log::info!("Starting dices_bot...");
+    log::info!("Starting kitty...");
 
     let bot = Bot::from_env();
 
-    tokio::spawn( async move {
-        let mut interval = time::interval(Duration::from_millis(2000));
-        for _i in 0..5 {
-            interval.tick().await;
-            webrequest().await;
-        }
-    });
-
-    teloxide::repl(bot, |message| async move {
+    let check_kitties = kittenloop();
+    let awnser_message = teloxide::repl(bot, |message| async move {
         message.answer_dice().send().await?;
         ResponseResult::<()>::Ok(())
-    })
-    .await;
-
+    });
+    
+    tokio::join!(check_kitties, awnser_message);
 }
