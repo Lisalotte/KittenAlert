@@ -16,12 +16,14 @@ async fn webrequest() -> Result<(), reqwest::Error> {
     Ok(())
 }
 
-async fn kittenloop() {
-    let mut interval = time::interval(Duration::from_millis(2000));
-    loop {
+async fn kittenloop(bot: teloxide::Bot) {
+    let id = 249861073;
+    bot.send_message(id, "Hello World").send().await.unwrap();
+    let mut interval = time::interval(Duration::from_secs(10));
+    /*loop {
         interval.tick().await;
         webrequest().await.unwrap();
-    }
+    }*/
 }
 
 #[tokio::main]
@@ -33,11 +35,12 @@ async fn main() {
 
     let bot = Bot::from_env();
 
-    let check_kitties = kittenloop();
-    let awnser_message = teloxide::repl(bot, |message| async move {
+    let check_kitties = kittenloop(bot.clone());
+    let answer_message = teloxide::repl(bot, |message| async move {
+        dbg!(&message);
         message.answer_dice().send().await?;
         ResponseResult::<()>::Ok(())
     });
     
-    tokio::join!(check_kitties, awnser_message);
+    tokio::join!(check_kitties, answer_message);
 }
