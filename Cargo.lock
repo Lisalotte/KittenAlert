@@ -638,10 +638,12 @@ dependencies = [
 name = "kittenalert"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "chrono",
  "log",
  "pretty_env_logger",
  "reqwest",
+ "serde",
  "sled",
  "teloxide",
  "teloxide-macros",
